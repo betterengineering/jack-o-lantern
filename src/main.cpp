@@ -52,21 +52,84 @@ void setup()
   pixels->clear();
 }
 
+void setColor(int r, int g, int b)
+{
+  for (int p = 0; p < numPixels; p++)
+  {
+    pixels->setPixelColor(
+        p,
+        pgm_read_byte(&gamma8[r]),
+        pgm_read_byte(&gamma8[g]),
+        pgm_read_byte(&gamma8[b]));
+  }
+}
+
+void setOrange(int brightness)
+{
+  pixels->setBrightness(brightness);
+  setColor(255, 150, 0);
+  pixels->show();
+}
+
+void setPurple(int brightness)
+{
+  pixels->setBrightness(brightness);
+  setColor(210, 0, 255);
+  pixels->show();
+}
+
+void setGreen(int brightness)
+{
+  pixels->setBrightness(brightness);
+  setColor(0, 207, 62);
+  pixels->show();
+}
+
+void setPumpkinColor(int c, int brightness)
+{
+  int color = c % 3;
+  if (color == 0)
+  {
+    setOrange(brightness);
+  }
+  else if (color == 1)
+  {
+    setPurple(brightness);
+  }
+  else
+  {
+    setGreen(brightness);
+  }
+}
+
 void loop()
 {
+  int count = 0;
+  int color = 0;
+
   for (int i = 0; i < 65535; i++)
   {
-    float intensity = maximumBrightness / 2.0 * (1.0 + sin(speedFactor * i));
-    pixels->setBrightness(intensity);
-    for (int j = 0; j < numPixels; j++)
+    int brightness = maximumBrightness / 2.0 * (1.0 + sin(speedFactor * i));
+
+    // There's a more elegant way to do this, but this is a pumpkin! Brightness
+    // is set at zero for 31-32 steps. So we can change color on brightness zero
+    // and step 1.
+    if (brightness == 0)
     {
-      pixels->setPixelColor(
-          j,
-          pgm_read_byte(&gamma8[255]),
-          pgm_read_byte(&gamma8[150]),
-          pgm_read_byte(&gamma8[0]));
+      count++;
     }
-    pixels->show();
+    else
+    {
+      count = 0;
+    }
+
+    if (count == 1)
+    {
+      color++;
+    }
+
+    setPumpkinColor(color, brightness);
+
     delay(stepDelay); // Pause before next pass through loop
   }
 }
